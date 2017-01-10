@@ -37,7 +37,7 @@ module JavaBuildpack
       FILTER = /jmxtrans/
 
       def detect
-        VERSION
+        VERSION if @application.services.one_service?(FILTER)
       end
 
       def compile
