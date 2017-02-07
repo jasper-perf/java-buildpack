@@ -58,7 +58,7 @@ module JavaBuildpack
         data = OpenStruct.new(
           port: port,
           host: host,
-         namePrefix: "#{ENV['CF_ORG']}.#{@application.details['space_name']}.#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
+         namePrefix: "#{ENV['CF_ORG']}.#{@application.details['space_name']}.#{@application.details['application_name']}.${CF_INSTANCE_INDEX}."
         ).instance_eval { binding }
 
         content = ERB.new(File.read(path)).result(data)
