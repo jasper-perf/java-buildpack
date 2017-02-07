@@ -41,6 +41,7 @@ module JavaBuildpack
       end
 
       def compile
+        system('printenv')
         download_jar(VERSION, URL, JARNAME)
 
         path = JavaBuildpack::Component::Droplet.const_get(:RESOURCES_DIRECTORY) +
