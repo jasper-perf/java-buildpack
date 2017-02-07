@@ -91,6 +91,7 @@ module JavaBuildpack
           'mountainlion'
         elsif !`which lsb_release 2> /dev/null`.empty?
           `lsb_release -cs`.strip
+          'trusty'.strip 
         else
           raise 'Unable to determine platform'
         end
