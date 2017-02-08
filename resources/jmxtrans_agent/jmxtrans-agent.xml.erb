@@ -29,7 +29,7 @@
            resultAlias="jvm.GcCollectionTime"/>
   </queries>
 
-  <outputWriter class="org.jmxtrans.agent.GraphitePlainTextTcpOutputWriter">
+  <outputWriter class="org.jmxtrans.agent.StatsDOutputWriter">
     <host><%= host %></host>
     <port><%= port %></port>
     <namePrefix><%= namePrefix %></namePrefix>
