@@ -3,6 +3,14 @@
     <!-- OS -->
     <query objectName="java.lang:type=OperatingSystem" attribute="SystemLoadAverage"
            resultAlias="os.systemLoadAverage"/>
+    <query objectName="java.lang:type=OperatingSystem" attribute="FreePhysicalMemorySize" 
+           resultAlias="os.systemFreeMemory"/>
+    <query objectName="java.lang:type=OperatingSystem" attribute="TotalPhysicalMemorySize" 
+           resultAlias="os.systemTotalMemory"/>
+    <query objectName="java.lang:type=OperatingSystem" attribute="TotalSwapSpaceSize" 
+           resultAlias="os.systemTotalSwap"/>
+    <query objectName="java.lang:type=OperatingSystem" attribute="FreeSwapSpaceSize" 
+           resultAlias="os.systemFreeSwap"/>
 
     <!-- JVM -->
     <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage" key="used"
@@ -14,9 +22,13 @@
     <query objectName="java.lang:type=Memory" attribute="NonHeapMemoryUsage" key="committed"
            resultAlias="jvm.nonHeapMemoryUsage.committed"/>
     <query objectName="java.lang:type=ClassLoading" attribute="LoadedClassCount" resultAlias="jvm.loadedClasses"/>
-
     <query objectName="java.lang:type=Threading" attribute="ThreadCount" resultAlias="jvm.thread"/>
+    <query objectName="java.lang:type=GarbageCollector,name=*" attribute="CollectionCount" 
+           resultAlias="jvm.GcCollectionCount"/>
+    <query objectName="java.lang:type=GarbageCollector,name=*" attribute="CollectionTime" 
+           resultAlias="jvm.GcCollectionTime"/>
   </queries>
+
   <outputWriter class="org.jmxtrans.agent.GraphitePlainTextTcpOutputWriter">
     <host><%= host %></host>
     <port><%= port %></port>
@@ -24,10 +36,5 @@
   </outputWriter>
   <outputWriter class="org.jmxtrans.agent.ConsoleOutputWriter">
     <enabled>false</enabled>
-  </outputWriter>
-  <outputWriter class="org.jmxtrans.agent.RollingFileOutputWriter">
-    <fileName>rollingJMXOutputFile</fileName>
-    <maxFileSize>10</maxFileSize>
-    <maxBackupIndex>4</maxBackupIndex>
   </outputWriter>
 </jmxtrans-agent>
