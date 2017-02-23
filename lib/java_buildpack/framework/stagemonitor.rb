@@ -18,8 +18,9 @@ require 'java_buildpack/component/base_component'
 require 'java_buildpack/framework'
 require 'erb'
 require 'ostruct'
-require 'git'
 require 'fileutils'
+
+gem "git", "~> 1.3"
 
 module JavaBuildpack
   module Framework
