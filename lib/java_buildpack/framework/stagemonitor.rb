@@ -58,11 +58,11 @@ module JavaBuildpack
         #Gem::GemRunner.new.run ['install', 'git']
         #system ("export PATH=/home/vcap/.gem/ruby/2.3.0/bin:$PATH")
         #system("gem install --user-install git")
-        #Gem.clear_paths
-        #ENV['GEM_HOME'] = File.join(Dir.pwd, 'gems')
-        #ENV['GEM_PATH'] = File.join(Dir.pwd, 'gems') 
-        #Gem::GemRunner.new.run ['install', 'git'] 
-        #require git
+        Gem.clear_paths
+        ENV['GEM_HOME'] = "Gem.dir:" + File.join(Dir.pwd, 'gems')
+        ENV['GEM_PATH'] = "Gem.path" + File.join(Dir.pwd, 'gems') 
+        Gem::GemRunner.new.run ['install', 'git'] 
+        require git
 
         download_dependencies
       end
