@@ -19,7 +19,6 @@ require 'java_buildpack/framework'
 require 'erb'
 require 'ostruct'
 require 'fileutils'
-require 'bundler/inline'
 
 module JavaBuildpack
   module Framework
@@ -52,10 +51,7 @@ module JavaBuildpack
 
 
       def compile
-        gemfile(true) do
-          source 'https://rubygems.org'
-          gem 'git'
-        end
+        system("gem install git")
         download_dependencies
       end
 
