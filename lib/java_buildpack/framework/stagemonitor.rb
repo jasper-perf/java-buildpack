@@ -58,19 +58,11 @@ module JavaBuildpack
         #Gem::GemRunner.new.run ['install', 'git']
         #system ("export PATH=/home/vcap/.gem/ruby/2.3.0/bin:$PATH")
         #system("gem install --user-install git")
-        Gem.clear_paths
-        ENV['GEM_HOME'] = File.join(Dir.pwd, 'gems')
-        ENV['GEM_PATH'] = File.join(Dir.pwd, 'gems') 
-        Gem::GemRunner.new.run ['install', 'git'] 
-        require git
-        require 'java_buildpack/component/base_component'
-        require 'java_buildpack/framework'
-        require 'erb'
-        require 'ostruct'
-        require 'fileutils'
-        require 'rubygems'
-        require 'rubygems/gem_runner'
-        require 'rubygems/exceptions'
+        #Gem.clear_paths
+        #ENV['GEM_HOME'] = File.join(Dir.pwd, 'gems')
+        #ENV['GEM_PATH'] = File.join(Dir.pwd, 'gems') 
+        #Gem::GemRunner.new.run ['install', 'git'] 
+        #require git
 
         download_dependencies
       end
@@ -89,8 +81,8 @@ module JavaBuildpack
 
 
       def download_dependencies
-        g = Git.clone(URI, REPO_NAME, :path => './')
-        system( "cd #{REPO_NAME}; ./gradlew copyLibs -PstagemonitorVersion=#{VERSION}" )
+        #g = Git.clone(URI, REPO_NAME, :path => './')
+        #system( "cd #{REPO_NAME}; ./gradlew copyLibs -PstagemonitorVersion=#{VERSION}" )
         in_dir = @droplet.root + "#{REPO_NAME}/build/."
         out_dir = @droplet.root + "lib"
         FileUtils.cp_r in_dir, out_dir
