@@ -63,6 +63,15 @@ module JavaBuildpack
         ENV['GEM_PATH'] = File.join(Dir.pwd, 'gems') 
         Gem::GemRunner.new.run ['install', 'git'] 
         require git
+        require 'java_buildpack/component/base_component'
+        require 'java_buildpack/framework'
+        require 'erb'
+        require 'ostruct'
+        require 'fileutils'
+        require 'rubygems'
+        require 'rubygems/gem_runner'
+        require 'rubygems/exceptions'
+
         download_dependencies
       end
 
