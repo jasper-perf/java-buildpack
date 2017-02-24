@@ -85,7 +85,7 @@ module JavaBuildpack
         #system( "cd #{REPO_NAME}; ./gradlew copyLibs -PstagemonitorVersion=#{VERSION}" )
         in_dir = @droplet.root + "#{REPO_NAME}/build/."
         out_dir = @droplet.root + "lib"
-        FileUtils.cp_r in_dir, out_dir
+        #FileUtils.cp_r in_dir, out_dir
         download_jar(VERSION, JAR_URL, JARNAME)  
         FileUtils.cp_r @droplet.sandbox + JARNAME, out_dir         
       end
