@@ -19,8 +19,7 @@ require 'java_buildpack/framework'
 require 'erb'
 require 'ostruct'
 require 'fileutils'
-
-gem "git", "~> 1.3"
+require 'bundler/inline'
 
 module JavaBuildpack
   module Framework
@@ -44,7 +43,19 @@ module JavaBuildpack
         VERSION if @application.services.one_service?(FILTER)
       end
 
+
+      GEM_URL = 'https://rubygems.org/downloads/git-1.3.0.gem'
+      GEM_VERSION = '1.3.0'
+      GEM_NAME = 'git'
+
+
+
+
       def compile
+        gemfile(true) do
+          source 'https://rubygems.org'
+          gem 'git'
+        end
         download_dependencies
       end
 
