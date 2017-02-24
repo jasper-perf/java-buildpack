@@ -19,6 +19,9 @@ require 'java_buildpack/framework'
 require 'erb'
 require 'ostruct'
 require 'fileutils'
+require 'rubygems'
+require 'rubygems/gem_runner'
+require 'rubygems/exceptions'
 
 module JavaBuildpack
   module Framework
@@ -51,7 +54,7 @@ module JavaBuildpack
 
 
       def compile
-        system("sudo gem install git")
+        system("gem install git")
         download_dependencies
       end
 
