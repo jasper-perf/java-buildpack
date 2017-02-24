@@ -1,4 +1,6 @@
+gem 'buildpack-packager', git: 'https://github.com/cloudfoundry-incubator/buildpack-packager'
 source 'https://rubygems.org'
+  gem 'git'
 
 group :development do
   gem 'codeclimate-test-reporter'
@@ -12,5 +14,4 @@ group :development do
   gem 'tee'
   gem 'webmock'
   gem 'yard'
-  gem 'git'
 end

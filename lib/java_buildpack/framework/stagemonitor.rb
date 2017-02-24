@@ -16,12 +16,18 @@
 
 require 'java_buildpack/component/base_component'
 require 'java_buildpack/framework'
+require 'java_buildpack/util/spring_boot_utils'
 require 'erb'
 require 'ostruct'
 require 'fileutils'
 require 'rubygems'
 require 'rubygems/gem_runner'
 require 'rubygems/exceptions'
+require "open-uri"
+require "cgi"
+require 'rexml/document'
+require 'net/http'
+
 
 module JavaBuildpack
   module Framework
@@ -30,84 +36,95 @@ module JavaBuildpack
 
 
       VERSION = '0.31.0'
-
-
-      URL = 'https://github.com/jmxtrans/jmxtrans-agent/releases/download/' +
-            "jmxtrans-agent-#{VERSION}/jmxtrans-agent-#{VERSION}.jar"
-
-
-      PORT_KEY = 'port'
-      HOST_KEY = 'host'
-
-      FILTER = /stagemonitor/
+      FILTER = 'stagemonitor'
 
       def detect
         VERSION if @application.services.one_service?(FILTER)
       end
 
-
-      GEM_URL = 'https://rubygems.org/downloads/git-1.3.0.gem'
-      GEM_VERSION = '1.3.0'
-      GEM_NAME = 'git'
-
-
-
-
       def compile
-        #system("gem install --user-install git")
-        #Gem::GemRunner.new.run ['install', 'git']
-        #system ("export PATH=/home/vcap/.gem/ruby/2.3.0/bin:$PATH")
-        #system("gem install --user-install git")
-        old_gem_home = ENV['GEM_HOME']
-        old_gem_path = ENV['GEM_PATH']
-        ENV['GEM_HOME'] = File.join(Dir.pwd, 'gems')
-        ENV['GEM_PATH'] = File.join(Dir.pwd, 'gems') 
-        Gem::GemRunner.new.run ['install', 'git'] 
-        require git
-        download_dependencies
-        ENV['GEM_HOME'] = old_gem_home
-        ENV['GEM_PATH'] = old_gem_path
+        download_dependencies 
       end
 
       def release
-        graphite_config = {}
+        stagemonitor_config = {}
         java_opts = @droplet.java_opts
+        write_opts(java_opts)
+        java_opts.add_javaagent(@droplet.root + 'WEB-INF/lib/byte-buddy-agent-1.5.7.jar')
       end
+
 
       private
 
-        URI='https://github.com/felixbarny/stagemonitor-get-all-libs'
-        REPO_NAME='stagemonitor_dependencies'
-        JAR_URL='https://s3-eu-west-1.amazonaws.com/stagemonitor-integration-assests-public/monitor-0.0.1.jar'
-        JARNAME='monitor-0.0.1.jar'
-
+      COMMON_DEPENDNCIES_URL = 'https://stagemonitor-integration-assests-public.s3.amazonaws.com'
+      SPRING_BOOT_DEPENDENCIES_REPO = 'https://github.com/andrey-bushik/stagemonitor-spring-boot-integration/releases/download'
+      SPRING_BOOT_AGENT_VERSION = '0.1.0'
 
       def download_dependencies
-        g = Git.clone(URI, REPO_NAME, :path => './')
-        system( "cd #{REPO_NAME}; ./gradlew copyLibs -PstagemonitorVersion=#{VERSION}" )
-        in_dir = @droplet.root + "#{REPO_NAME}/build/."
-        out_dir = @droplet.root + "lib"
-        FileUtils.cp_r in_dir, out_dir
-        download_jar(VERSION, JAR_URL, JARNAME)  
-        FileUtils.cp_r @droplet.sandbox + JARNAME, out_dir         
+
+          if spring_boot?
+              lib_path = spring_boot_lib_path
+              download_common_dependencies(lib_path)
+              download_spring_boot_dependencies(lib_path)
+          elsif tomcat?
+              lib_path = @droplet.root + 'WEB-INF/lib'
+              download_common_dependencies(lib_path)
+          end
+      end   
+     
+      def download_common_dependencies(lib_path) 
+
+        if COMMON_DEPENDNCIES_URL.include? "s3.amazonaws.com" 
+
+            xml_data = Net::HTTP.get_response(URI.parse(COMMON_DEPENDNCIES_URL)).body
+            doc = REXML::Document.new(xml_data)
+
+            doc.elements.each('/ListBucketResult/Contents/Key/') do |element|
+               jar_name = element.text
+               jar_url = "https://s3-eu-west-1.amazonaws.com/stagemonitor-integration-assests-public/" + jar_name
+               download_jar(VERSION, jar_url, jar_name)
+               FileUtils.cp_r @droplet.sandbox + jar_name, lib_path
+            end 
+        end 
       end
 
+      def download_spring_boot_dependencies(lib_path)
 
-      def get_graphite_opts(graphite_config)
-        if @application.services.one_service?(FILTER, [HOST_KEY, PORT_KEY])
-          graphite_config['graphite.host'] = @application.services.find_service(FILTER)['credentials']['host']
-          graphite_config['graphite.port'] = @application.services.find_service(FILTER)['credentials']['port']
-        else
-          graphite_config['graphite.host'] = "localhost"
-          graphite_config['graphite.port'] = "2003"
-        end
-        graphite_config['graphite.prefix'] = "apps.${CF_ORG}.#{@application.details['space_name']}.#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
+         spring_boot_version_tag = spring_boot_version.gsub(/\.[0-9]+\.[A-Z]+/, 'x') 
+         jar_name = "stagemonitor-spring-boot-#{spring_boot_version_tag}-#{SPRING_BOOT_AGENT_VERSION}.jar"
+         jar_url = "#{SPRING_BOOT_DEPENDENCIES_REPO}/#{SPRING_BOOT_AGENT_VERSION}/#{jar_name}"
+         download_jar(VERSION, jar_url, jar_name)
+         FileUtils.cp_r @droplet.sandbox + jar_name, lib_path
+
       end
 
-      def write_java_opts(java_opts, grahite_config)
-        grahite_config.each do |key, value|
-          java_opts.add_system_property(key, value)
-        end
+      def write_opts(java_opts)
+          credentials = @application.services.find_service(FILTER)['credentials']
+          credentials.each do |key, value|
+            java_opts.add_system_property(key, value)
+          end
+      end
+
+      # helpers
+
+      def spring_boot?
+        JavaBuildpack::Util::SpringBootUtils.new.is?(@application)
+      end
+
+      def tomcat?
+        war? && !spring_boot? 
+      end
+
+      def spring_boot_version
+        JavaBuildpack::Util::SpringBootUtils.new.version(@application) 
+      end
+
+      def war?
+        (@droplet.root + 'WEB-INF/lib').exist?
+      end
+      
+      def spring_boot_lib_path
+        JavaBuildpack::Util::SpringBootUtils.new.lib(@droplet)
       end
 
     end

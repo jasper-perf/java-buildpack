@@ -1,0 +1,79 @@
+#!/usr/bin/env ruby
+require 'buildpack/packager'
+require 'optparse'
+require 'buildpack/manifest_validator'
+
+SUPPORTED_MODES = %w(cached uncached list defaults).freeze
+USAGE_MSG       = "USAGE: #{File.basename(__FILE__)} < #{SUPPORTED_MODES.map { |mode| '--' + mode }.join(' | ')} >".freeze
+
+options = {
+  root_dir:       Dir.pwd,
+  manifest_path:  'manifest.yml',
+  force_download: false
+}
+
+optparser = OptionParser.new do |opts|
+  opts.banner = USAGE_MSG
+
+  opts.on('--cached', 'Package dependencies with the built buildpack.') do
+    options[:mode] = :cached
+  end
+
+  opts.on('--uncached', 'Will NOT package dependencies with the built buildpack.') do
+    options[:mode] = :uncached
+  end
+
+  opts.on('--list', 'List dependencies supported by the buildpack.') do
+    options[:mode] = :list
+  end
+
+  opts.on('--defaults', 'List default dependency versions specified by the buildpack.') do
+    options[:mode] = :defaults
+  end
+
+  opts.on('--force-download', 'Force dependencies to be downloaded from the internet. (default is false)') do
+    options[:force_download] = true
+  end
+
+  opts.on('--use-custom-manifest=PATH_TO_MANIFEST', 'Use a custom manifest, passing the path as an argument.') do |manifest_path|
+    options[:manifest_path] = manifest_path
+  end
+
+  opts.on_tail('-h', '--help', 'Show this message') do
+    puts opts
+    exit
+  end
+end
+
+optparser.parse!
+
+unless options[:mode]
+  puts optparser
+  exit 1
+end
+
+manifest_path = options[:manifest_path]
+unless File.exist?(manifest_path)
+  STDERR.puts "Could not find #{manifest_path}"
+  exit 1
+end
+
+validator = Buildpack::ManifestValidator.new(manifest_path)
+unless validator.valid?
+  errors = validator.errors
+  if errors[:manifest_parser_errors]
+    STDERR.print "The manifest does not conform to the schema:\n\t- "
+    STDERR.puts errors[:manifest_parser_errors].join("\n\t- ")
+  end
+
+  STDERR.puts errors[:default_version].join("\n\t")
+  exit 1
+end
+
+if options[:mode] == :list
+  puts Buildpack::Packager.list(options)
+elsif options[:mode] == :defaults
+  puts Buildpack::Packager.defaults(options)
+else
+  Buildpack::Packager.package(options)
+end
