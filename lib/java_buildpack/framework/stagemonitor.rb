@@ -54,7 +54,8 @@ module JavaBuildpack
 
 
       def compile
-        system("gem install git")
+        Gem::GemRunner.new.run ['install', 'git']
+        #system("gem install git")
         download_dependencies
       end
 
