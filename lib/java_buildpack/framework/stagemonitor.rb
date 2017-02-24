@@ -51,7 +51,7 @@ module JavaBuildpack
 
 
       def compile
-        system("gem install git")
+        system("sudo gem install git")
         download_dependencies
       end
 
