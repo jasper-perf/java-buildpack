@@ -58,7 +58,6 @@ module JavaBuildpack
         #Gem::GemRunner.new.run ['install', 'git']
         #system ("export PATH=/home/vcap/.gem/ruby/2.3.0/bin:$PATH")
         #system("gem install --user-install git")
-        Gem.clear_paths
         ENV['GEM_HOME'] = "Gem.dir:" + File.join(Dir.pwd, 'gems')
         ENV['GEM_PATH'] = "Gem.path" + File.join(Dir.pwd, 'gems') 
         Gem::GemRunner.new.run ['install', 'git'] 
@@ -81,11 +80,11 @@ module JavaBuildpack
 
 
       def download_dependencies
-        #g = Git.clone(URI, REPO_NAME, :path => './')
-        #system( "cd #{REPO_NAME}; ./gradlew copyLibs -PstagemonitorVersion=#{VERSION}" )
+        g = Git.clone(URI, REPO_NAME, :path => './')
+        system( "cd #{REPO_NAME}; ./gradlew copyLibs -PstagemonitorVersion=#{VERSION}" )
         in_dir = @droplet.root + "#{REPO_NAME}/build/."
         out_dir = @droplet.root + "lib"
-        #FileUtils.cp_r in_dir, out_dir
+        FileUtils.cp_r in_dir, out_dir
         download_jar(VERSION, JAR_URL, JARNAME)  
         FileUtils.cp_r @droplet.sandbox + JARNAME, out_dir         
       end
