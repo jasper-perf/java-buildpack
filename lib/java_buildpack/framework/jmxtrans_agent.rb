@@ -38,11 +38,9 @@ module JavaBuildpack
 
       def detect
         VERSION if @application.services.one_service?(FILTER)
-        puts Dir.entries("./")
       end
 
       def compile
-        system('printenv')
         download_jar(VERSION, URL, JARNAME)
 
         path = JavaBuildpack::Component::Droplet.const_get(:RESOURCES_DIRECTORY) +
