@@ -50,7 +50,7 @@ module JavaBuildpack
         stagemonitor_config = {}
         java_opts = @droplet.java_opts
         write_opts(java_opts)
-        java_opts.add_javaagent(@droplet.root + 'WEB-INF/lib/byte-buddy-agent-1.5.7.jar')
+        java_opts.add_javaagent(lib_path + "byte-buddy-agent-1.5.7.jar")
       end
 
 
@@ -60,14 +60,22 @@ module JavaBuildpack
       SPRING_BOOT_DEPENDENCIES_REPO = 'https://github.com/andrey-bushik/stagemonitor-spring-boot-integration/releases/download'
       SPRING_BOOT_AGENT_VERSION = '0.1.0'
 
+      def lib_path
+          if spring_boot?
+              return spring_boot_lib_path
+          elsif tomcat?
+              return @droplet.root + 'WEB-INF/lib'
+          end
+      end
+
       def download_dependencies
 
           if spring_boot?
-              lib_path = spring_boot_lib_path
+              #lib_path = spring_boot_lib_path
               download_common_dependencies(lib_path)
               download_spring_boot_dependencies(lib_path)
           elsif tomcat?
-              lib_path = @droplet.root + 'WEB-INF/lib'
+              #lib_path = @droplet.root + 'WEB-INF/lib'
               download_common_dependencies(lib_path)
           end
       end   
