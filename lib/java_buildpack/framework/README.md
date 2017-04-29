@@ -14,7 +14,9 @@ git clone https://github.com/spring-projects/spring-petclinic
 Application should be compiled before deployment
 ```bash
 cd spring-petclinic/
+```
 compile application
+```bash
 ./mvnw package
 ```
 
