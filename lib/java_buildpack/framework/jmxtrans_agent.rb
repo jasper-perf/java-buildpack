@@ -34,7 +34,7 @@ module JavaBuildpack
       PORT_KEY = 'port'
       HOST_KEY = 'host'
 
-      FILTER = /jmxtrans/
+      FILTER = /heartbeat/
 
       def detect
         VERSION if @application.services.one_service?(FILTER)
@@ -63,7 +63,7 @@ module JavaBuildpack
           graphite_config['graphite.host'] = "localhost"
           graphite_config['graphite.port'] = "2003"
         end
-        graphite_config['graphite.prefix'] = "apps.${CF_ORG}.#{@application.details['space_name']}.#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
+        graphite_config['graphite.prefix'] = "jmxtrans.${CF_ORG}.#{@application.details['space_name']}.#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
       end
 
       def write_java_opts(java_opts, grahite_config)
