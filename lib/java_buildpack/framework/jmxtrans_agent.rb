@@ -34,7 +34,7 @@ module JavaBuildpack
       PORT_KEY = 'port'
       HOST_KEY = 'host'
 
-      FILTER = /heartbeat/
+      FILTER = /jmxtrans/
 
       def detect
         VERSION if @application.services.one_service?(FILTER)
