@@ -38,6 +38,11 @@ a) buildback git path. Altoros modified buildpack used to attach and configure
 jmx trans agent. Today's way is just using online version of buildpack
 
 ## Push application. The simpliest step. Just
+cd to directory with application and manifest
+```bash
+cd spring-petclinic
+```
+and push application
 ```bash
 cf push
 ```
