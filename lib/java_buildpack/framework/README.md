@@ -30,16 +30,11 @@ compile application
    random-route: true
    path: target/spring-petclinic-1.5.1.jar
    buildpack: https://github.com/Altoros/java-buildpack#jmx-agent-integration
-   env:
-     CF_ORG: admin
 ```
 
 Important things here:
 
-a) env variable CF_ORG. It's the only way to know which org
-app installed in. Unfortunatelly, it should be set up manually.
-
-b) buildback git path. Altoros modified buildpack used to attach and configure
+a) buildback git path. Altoros modified buildpack used to attach and configure
 jmx trans agent. Today's way is just using online version of buildpack
 
 ## Push application. The simpliest step. Just
