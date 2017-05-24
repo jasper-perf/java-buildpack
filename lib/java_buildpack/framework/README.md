@@ -20,7 +20,7 @@ compile application
 ./mvnw package
 ```
 
-## Create manifest. Example maifest looks like below.
+## Create manifest. Example manifest looks like below.
 
  Here is example manifest
 ```bash
@@ -31,6 +31,11 @@ compile application
    path: target/spring-petclinic-1.5.1.jar
    buildpack: https://github.com/Altoros/java-buildpack#jmx-agent-integration
 ```
+```bash
+cd spring-petclinic
+vim manifest.yml
+```
+and past your manifest in this file
 
 Important things here:
 
