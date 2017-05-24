@@ -33,6 +33,7 @@ module JavaBuildpack
 
       PORT_KEY = 'port'
       HOST_KEY = 'host'
+      ORG_SPACE_PREFIX = 'jmxtrans_prefix'
 
       FILTER = /jmxtrans/
 
@@ -56,14 +57,16 @@ module JavaBuildpack
       private
 
       def get_graphite_opts(graphite_config)
-        if @application.services.one_service?(FILTER, [HOST_KEY, PORT_KEY])
+        if @application.services.one_service?(FILTER, [HOST_KEY, PORT_KEY, ORG_SPACE_PREFIX])
           graphite_config['graphite.host'] = @application.services.find_service(FILTER)['credentials']['host']
           graphite_config['graphite.port'] = @application.services.find_service(FILTER)['credentials']['port']
+          org_space_prefix = @application.services.find_service(FILTER)['credentials']['jmxtrans_prefix']
         else
           graphite_config['graphite.host'] = "localhost"
           graphite_config['graphite.port'] = "2003"
+          org_space_prefix = "jmxtrans."
         end
-        graphite_config['graphite.prefix'] = "jmxtrans.${CF_ORG}.#{@application.details['space_name']}.#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
+        graphite_config['graphite.prefix'] = org_space_prefix + ".#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
       end
 
       def write_java_opts(java_opts, grahite_config)
