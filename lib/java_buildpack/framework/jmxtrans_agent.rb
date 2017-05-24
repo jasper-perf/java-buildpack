@@ -66,7 +66,7 @@ module JavaBuildpack
           graphite_config['graphite.port'] = "2003"
           org_space_prefix = "jmxtrans."
         end
-        graphite_config['graphite.prefix'] = org_space_prefix + ".#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
+        graphite_config['graphite.prefix'] = org_space_prefix + "#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
       end
 
       def write_java_opts(java_opts, grahite_config)
